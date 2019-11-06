@@ -1,0 +1,77 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 15 15:05:50 2019
+
+@author: zetinogranadosv
+"""
+
+import pyspark
+sc = pyspark.SparkContext(appName = "Final Project")
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+###########################################################
+#School Shootings Dataset
+###########################################################
+
+rdd1 = sc.textFile("C:\\Users\\zetinogranadosv\\OneDrive - Eastern Connecticut State University\\BIGDATAFINAL\\pah_wikp_combo.csv")
+rdd1.persist()
+
+# LIST THE NUMBER OF FATALITIES PER CITY 
+
+x = rdd1.map(lambda x: x.split(',')).map(lambda k : (k[1],k[5]))
+y  = x.groupByKey().map(lambda r: ((len(r[1])), r[0])).sortByKey(ascending = False)
+y.collect()
+
+
+#GRAPH SHOWING THE NUMBER OF FATALITES PER CITY FOR TOP 5 CITIES
+
+cities = y.map(lambda x: x[1])
+amount = y.map(lambda x: x[0])
+
+objects = (cities.take(5))
+y_pos = np.arange(len(objects))
+performance = amount.take(5)
+
+plt.bar(y_pos, performance, align='center', alpha=0.5)
+plt.xticks(y_pos, objects)
+plt.ylabel('Number')
+plt.title('Fatalities Per City')
+
+plt.show()
+
+###########################################################
+#Unofficial Holiday Dataset
+###########################################################
+
+rdd2 = sc.textFile("C:\\Users\\zetinogranadosv\\OneDrive - Eastern Connecticut State University\\BIGDATAFINAL\\unofficial_holiday.csv")
+rdd2.persist()
+
+#COUNT ALL THE HOLIDAYS PER TYPE 
+
+rdd2 = rdd2.map(lambda x: x.split(',')).map(lambda k: (k[2],1))
+rdd2 = rdd2.sortByKey()
+rdd2 = rdd2.reduceByKey(lambda v1,v2: v1 + v2)
+rdd2.collect()
+
+
+#GRAPH SHOWING THE # OF HOLIDAYS PER TYPE 
+#COULDN'T SHOW ALL BECUSE THE NAMES OVERLAPPED 
+
+number = rdd2.map(lambda x: x[1])
+activities = rdd2.map(lambda x: x[0])
+
+objects = (activities.take(5))
+y_pos = np.arange(len(objects))
+performance = number.take(5)
+
+plt.bar(y_pos, performance, align='center', alpha=0.5)
+plt.xticks(y_pos, objects)
+plt.ylabel('Number')
+plt.title('Number Of Holidays Per Type')
+
+plt.show()
+
+
